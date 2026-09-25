@@ -1,16 +1,25 @@
+# CLI tools(Linux-native vs Rust) for data processing
+
+## Environment:
+OS: Fedora 38
+Rust: 1.90.0
+
 ## Tools
 
 ```
-cargo install bat
-cargo install awk-rs
-cargo install huniq
-cargo install gnu-sort
+cargo install bat #rust cat clone
+cargo install awk-rs #rust awk clone
+cargo install huniq #rust uniq clone
+cargo install gnu-sort #rust sort clone
 which sort
 ~/.cargo/bin/sort
 ```
 
 ## Data
 https://www.kaggle.com/datasets/danielpe/earthquakes
+
+Dataset size: 609M
+Rows: 3272775
 
 ## Processing
 
