@@ -1,0 +1,1 @@
+lsof | jc-rs --lsof | jaq -c '.[] | {user, pid, command,type}'|sort|huniq -c|sort -k1nr
