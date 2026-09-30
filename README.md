@@ -22,26 +22,26 @@ Wall time is the `hyperfine` mean of 10 runs. CPU % and max RSS are from a singl
 Rust pipelines finished sooner on both workloads. On the CSV they used more CPU and memory; on `lsof` they used less of both.
 
 ## Environment:
-OS: Fedora 38
-Rust: 1.90.0
+OS: Fedora 38  
+Rust: 1.90.0  
 
 ### Rust utils
-bat v0.26.1 #rust cat clone
-awk-rs v0.2.0 #rust awk clone
-huniq v2.7.0 #rust uniq clone
-gnu-sort v1.0.5 #rust sort clone
-lsof v4.10.0
-jaq 3.1.1 #rust jq clone
-jc-rs 0.5.1 #rust jc clone
+bat v0.26.1 #rust cat clone  
+awk-rs v0.2.0 #rust awk clone  
+huniq v2.7.0 #rust uniq clone  
+gnu-sort v1.0.5 #rust sort clone  
+lsof v4.10.0  
+jaq 3.1.1 #rust jq clone  
+jc-rs 0.5.1 #rust jc clone  
 
 ### Linux utils
-cat (GNU coreutils) 9.1
-GNU Awk 5.1.1
-uniq (GNU coreutils) 9.1
-lsof 4.96.3
-sort (GNU coreutils) 9.1
-jq-1.6
-jc 1.25.2
+cat (GNU coreutils) 9.1  
+GNU Awk 5.1.1  
+uniq (GNU coreutils) 9.1  
+lsof 4.96.3  
+sort (GNU coreutils) 9.1  
+jq-1.6  
+jc 1.25.2  
 
 ## Install Rust crates
 
