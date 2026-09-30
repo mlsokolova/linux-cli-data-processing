@@ -1,22 +1,52 @@
 # Lean data processing
 
+Troubleshooting and RCA are often data-processing jobs: slice and filter large files, count unique values. The useful tools are already on the machine and can be composed with pipes, with no cluster, notebook, or custom program.
+
+This repo looks for **out-of-the-box** pipelines that make that work faster, and checks whether popular Rust clones of those tools (`bat`, `awk-rs`, `huniq`, `gnu-sort`, `jaq`, etc) actually shorten wall time on realistic inputs.
+
+Experiment 1 is bulk file processing (a 609 MB earthquake CSV). 
+
+Experiment 2 is a live system snapshot, count of the open files by user, PID, command and file type  (`lsof` → JSON → counts), closer to an incident loop.
+
+## Results
+
+Wall time is the `hyperfine` mean of 10 runs. CPU % and max RSS are from a single `/usr/bin/time` run.
+
+| Experiment | Pipeline | Wall time | CPU % | Max RSS |
+|---|---|---|---|---|
+| 1. Earthquake CSV | GNU (`cat`, `awk`, `sort`, `uniq`) | 25.2 s ± 2.2 s | 185% | 10 MB |
+| 1. Earthquake CSV | Rust (`bat`, `awk-rs`, `sort`, `huniq`) | 16.3 s ± 0.7 s | 244% | 176 MB |
+| 2. Live `lsof` | GNU (`lsof`, `jc`, `jq`, `sort`, `uniq`) | 25.9 s ± 1.5 s | 91% | 761 MB |
+| 2. Live `lsof` | Rust (`lsof`, `jc-rs`, `jaq`, `sort`, `huniq`) | 4.2 s ± 0.5 s | 43% | 60 MB |
+
+Rust pipelines finished sooner on both workloads. On the CSV they used more CPU and memory; on `lsof` they used less of both.
+
 ## Environment:
 OS: Fedora 38
 Rust: 1.90.0
 
-## Tools
+### Rust utils
+bat v0.26.1 #rust cat clone
+awk-rs v0.2.0 #rust awk clone
+huniq v2.7.0 #rust uniq clone
+gnu-sort v1.0.5 #rust sort clone
+lsof v4.10.0
+jaq 3.1.1 #rust jq clone
+jc-rs 0.5.1 #rust jc clone
+
+### Linux utils
+cat (GNU coreutils) 9.1
+GNU Awk 5.1.1
+uniq (GNU coreutils) 9.1
+lsof 4.96.3
+sort (GNU coreutils) 9.1
+jq-1.6
+jc 1.25.2
+
+## Install Rust crates
 
 ```
-cargo install bat #rust cat clone
-cargo install awk-rs #rust awk clone
-cargo install huniq #rust uniq clone
-cargo install gnu-sort #rust sort clone
-which sort
-~/.cargo/bin/sort
-cargo install lsof
-which lsof
-~/.cargo/bin/lsof
-cargo install jaq
+cargo install bat awk-rs huniq gnu-sort lsof jaq jc-rs
 ```
 
 ## Experiment 1
@@ -35,7 +65,7 @@ cat data/quakes/consolidated_data.csv |awk -F'"' '{print $1, $3}'|awk -F',' '{pr
 
 #### Rust Clones of the Linux CLI Tools
 ```
-bat data/quakes/consolidated_data.csv |awk-rs -F'"' '{print $1, $3}'|awk-rs -F',' '{print $16}'|sort|huniq
+bat data/quakes/consolidated_data.csv |awk-rs -F'"' '{print $1, $3}'|awk-rs -F',' '{print $16}'|~/.cargo/bin/sort|huniq
 ```
 
 ### Benchmarking
@@ -46,11 +76,11 @@ bat data/quakes/consolidated_data.csv |awk-rs -F'"' '{print $1, $3}'|awk-rs -F',
 time: 21.43
 percent of CPU: 185%
 maximum resident set size, kb: 10240
-
+ 
 hyperfine ./ex1-linux-processing.sh 
 Benchmark 1: ./ex1-linux-processing.sh
-  Time (mean ± σ):     24.759 s ±  1.262 s    [User: 43.930 s, System: 2.018 s]
-  Range (min … max):   22.437 s … 26.006 s    10 runs
+  Time (mean ± σ):     25.225 s ±  2.211 s    [User: 44.021 s, System: 2.049 s]
+  Range (min … max):   21.446 s … 27.673 s    10 runs
 ```
 
 #### Rust Clones of the Linux CLI Tools
@@ -77,7 +107,7 @@ Benchmark 1: ./ex1-rust-processing.sh
 
 #### Rust Clones of the Linux CLI Tools
 ```
-lsof | jc-rs --lsof | jaq -c '.[] | {user, pid, command,type}'|sort|huniq -c|sort -k1nr
+~/.cargo/bin/lsof | jc-rs --lsof | jaq -c '.[] | {user, pid, command,type}'|~/.cargo/bin/sort|huniq -c|~/.cargo/bin/sort -k1nr
 ```
 
 ### Benchmark
@@ -89,7 +119,7 @@ time: 24.49
 percent of CPU: 91%
 maximum resident set size, kb: 761476
 
-./ex2-linux-processing.sh
+hyperfine ./ex2-linux-processing.sh
   Time (mean ± σ):     25.893 s ±  1.519 s    [User: 19.391 s, System: 4.006 s]
   Range (min … max):   25.085 s … 30.098 s    10 runs
 ```

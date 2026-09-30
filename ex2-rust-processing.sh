@@ -1,1 +1,2 @@
-lsof | jc-rs --lsof | jaq -c '.[] | {user, pid, command,type}'|sort|huniq -c|sort -k1nr
+#!/bin/bash
+~/.cargo/bin/lsof | jc-rs --lsof | jaq -c '.[] | {user, pid, command,type}'|~/.cargo/bin/sort|huniq -c|~/.cargo/bin/sort -k1nr
